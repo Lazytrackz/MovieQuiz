@@ -106,6 +106,7 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func show(quiz step: QuizStepViewModel) {
+        imageView.layer.cornerRadius = 20
         imageView.layer.borderWidth = 0
         counterLabel.text = step.questionNumber
         imageView.image = step.image
@@ -113,15 +114,15 @@ final class MovieQuizViewController: UIViewController {
         
     }
     
-    private func setImageBordert(currentImageVeiw: UIImageView,
+    private func setImageBorder(currentImageVeiw: UIImageView,
                                  borderColor: Bool) {
         imageView.layer.masksToBounds = true
-        imageView.layer.borderWidth = 1
+        imageView.layer.borderWidth = 8
         imageView.layer.borderColor = borderColor ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
-        imageView.layer.cornerRadius = 6
+        imageView.layer.cornerRadius = 20
     }
     
-    private func show(quiz result: QuizResultsViewModel) {
+    private func showResult(quiz result: QuizResultsViewModel) {
         let alert = UIAlertController(
             title: result.title,
             message: result.text,
@@ -139,10 +140,10 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showNextQuestionOrResults() {
-      if currentQuestionIndex == questions.count - 1 { // 1
+      if currentQuestionIndex == questions.count - 1 {
           let quizResult = QuizResultsViewModel (title: "Этот раунд окончен!", text: "Ваш результат: \(correctAnswers)", buttonText: "Сыграть ещё раз")
-          show(quiz: quizResult)} else {
-        currentQuestionIndex += 1
+          showResult(quiz: quizResult)} else {
+          currentQuestionIndex += 1
           let nextQuestion = questions[currentQuestionIndex]
           let viewModel = convert(model: nextQuestion)
           show(quiz: viewModel)
@@ -151,35 +152,15 @@ final class MovieQuizViewController: UIViewController {
     
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
-            setImageBordert(currentImageVeiw: imageView, borderColor: isCorrect)
+            setImageBorder(currentImageVeiw: imageView, borderColor: isCorrect)
             correctAnswers += 1
         }else {
-            setImageBordert(currentImageVeiw: imageView, borderColor: isCorrect)
+            setImageBorder(currentImageVeiw: imageView, borderColor: isCorrect)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
            self.showNextQuestionOrResults()
         }
     }
-    
-    
-   
-    
-    
-    
-    
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }
 
 /*
