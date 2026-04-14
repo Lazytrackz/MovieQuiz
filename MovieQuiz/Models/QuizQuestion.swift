@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+
+struct QuizQuestion {
+    let imageString: String
+    let text: String
+    let correctAnswer: Bool
+}

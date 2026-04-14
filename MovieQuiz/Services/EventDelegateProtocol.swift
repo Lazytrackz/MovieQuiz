@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+protocol EventDelegate: AnyObject {
+    func eventOccurred(data: String) // Метод, который будет вызван при событии
+}
