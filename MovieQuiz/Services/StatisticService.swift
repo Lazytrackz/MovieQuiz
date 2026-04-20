@@ -13,7 +13,7 @@ final class StatisticService {
     
     // MARK: - Properties
     
-    private var totalQustionsAmount: Int = 0
+    private var totalQuestionsAmount: Int = 0
     private var totalCorrectAnswersAmount: Int = 0
     private let storage: UserDefaults = .standard
     private var questionCount = 0
@@ -40,8 +40,8 @@ final class StatisticService {
     }
     
     private func setQuestionsAmount() {
-        let qustionAmout = gamesCount * questionCount
-        storage.set(qustionAmout, forKey: Keys.totalQuestionsAmount.rawValue)
+        let questionAmount = gamesCount * questionCount
+        storage.set(questionAmount, forKey: Keys.totalQuestionsAmount.rawValue)
     }
     
     private func getCorrectAnswersAmount() -> Int {
@@ -54,11 +54,11 @@ final class StatisticService {
     }
     
     private func calculateTotalAccuracy() {
-        totalQustionsAmount = getQuestionsAmount()
+        totalQuestionsAmount = getQuestionsAmount()
         totalCorrectAnswersAmount = getCorrectAnswersAmount()
         
-        if totalQustionsAmount > 0 {
-            totalAccuracy = (Double(totalCorrectAnswersAmount)/Double(totalQustionsAmount))*100
+        if totalQuestionsAmount > 0 {
+            totalAccuracy = (Double(totalCorrectAnswersAmount)/Double(totalQuestionsAmount))*100
         }
         else {
             totalAccuracy = 0

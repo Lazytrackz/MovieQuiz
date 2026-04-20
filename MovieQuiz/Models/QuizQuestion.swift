@@ -13,7 +13,7 @@ struct QuizQuestion {
     
     // MARK: - Properties
     
-    let imageString: String
+    let imageName: String
     let text: String
     let correctAnswer: Bool
 }

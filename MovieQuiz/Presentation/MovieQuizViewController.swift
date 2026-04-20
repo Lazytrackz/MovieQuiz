@@ -19,11 +19,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenter = AlertPresenter()
-    private var staticServies: StatisticServiceProtocol?
+    private var staticService: StatisticServiceProtocol?
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
-        formatter.dateFormat = "(dd.MM.yyyy HH:mm)"
+        formatter.dateFormat = "(dd.MM.yy HH:mm)"
         return formatter
     }()
     
@@ -46,13 +46,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let staticServies = StatisticService()
-        staticServies.setQuestionsCount(amount: questionsAmount)
-        self.staticServies = staticServies
+        let staticService = StatisticService()
+        staticService.setQuestionsCount(amount: questionsAmount)
+        self.staticService = staticService
         
         let questionFactory = QuestionFactory()
-            questionFactory.setDelegate(self)
-            self.questionFactory = questionFactory
+        questionFactory.setDelegate(self)
+        self.questionFactory = questionFactory
         
         self.questionFactory?.requestNextQuestion()
     }
@@ -87,12 +87,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     
     // MARK: - Private Methods
     
+    
+  
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(
-             image: UIImage(named: model.imageString) ?? UIImage(),
+         QuizStepViewModel(
+             image: UIImage(named: model.imageName) ?? UIImage(),
              question: model.text,
              questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-         return questionStep
     }
     
     private func show(quiz step: QuizStepViewModel) {
@@ -103,7 +104,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         textLabel.text = step.question
     }
     
-    private func setImageBorder(currentImageVeiw: UIImageView,
+    private func setImageBorder(currentImageView: UIImageView,
                                  borderColor: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
@@ -115,7 +116,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         let alertModel = AlertModel (title: result.title, message: result.text, buttonText: result.buttonText, completion: { [weak self] in
             guard let self = self else { return }
             beginNewGame()})
-         alertPresenter.showEndGameAllert(alertModel: alertModel, controller: self)
+         
+         alertPresenter.showEndGameAlert(alertModel: alertModel, controller: self)
     }
     
     private func showNextQuestionOrResults() {
@@ -131,10 +133,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
-            setImageBorder(currentImageVeiw: imageView, borderColor: isCorrect)
+            setImageBorder(currentImageView: imageView, borderColor: isCorrect)
             correctAnswers += 1
         }else {
-            setImageBorder(currentImageVeiw: imageView, borderColor: isCorrect)
+            setImageBorder(currentImageView: imageView, borderColor: isCorrect)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else {return}
@@ -151,10 +153,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     private func setGameResult() -> String {
         let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: questionsAmount, endGameDate: Date())
         
-        staticServies?.storeGameResult(gameResult: gameResult)
-        guard let gamesCount = staticServies?.gamesCount else {return "0"}
-        guard let bestGame = staticServies?.bestGameResult else {return "0"}
-        guard let totalAccuracy = staticServies?.totalAccuracy else {return "0"}
+        staticService?.storeGameResult(gameResult: gameResult)
+        guard let gamesCount = staticService?.gamesCount else {return "0"}
+        guard let bestGame = staticService?.bestGameResult else {return "0"}
+        guard let totalAccuracy = staticService?.totalAccuracy else {return "0"}
         
         let bestGameString = bestGame.correctAnswers
         let totalQuestionsString = bestGame.totalGameQuestions

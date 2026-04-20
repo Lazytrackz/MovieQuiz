@@ -14,7 +14,7 @@ final class AlertPresenter {
     
     // MARK: - Methods
     
-    func showEndGameAllert(alertModel: AlertModel, controller: UIViewController) {
+    func showEndGameAlert(alertModel: AlertModel, controller: UIViewController) {
         
         let alert = UIAlertController(
             title: alertModel.title,
