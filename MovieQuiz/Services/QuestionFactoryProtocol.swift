@@ -7,6 +7,11 @@
 
 import Foundation
 
+//MARK: - QuestionFactoryProtocol 
+
 protocol QuestionFactoryProtocol {
+    
+    // MARK: - Methods
+
     func requestNextQuestion()
 }

@@ -7,7 +7,12 @@
 
 import Foundation
 
+//MARK: - QuestionFactoryDelegate
+
 protocol QuestionFactoryDelegate: AnyObject {
+
+    // MARK: - Methods
+    
     func didReceiveNextQuestion(question: QuizQuestion?)
 
 }

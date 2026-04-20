@@ -7,8 +7,12 @@
 
 import Foundation
 
+//MARK: - QuizQuestionModel
 
 struct QuizQuestion {
+    
+    // MARK: - Properties
+    
     let imageString: String
     let text: String
     let correctAnswer: Bool

@@ -7,7 +7,12 @@
 
 import Foundation
 
+//MARK: - QuizResultsViewModel
+
 struct QuizResultsViewModel {
+    
+    // MARK: - Properties
+    
     let title: String
     let text: String
     let buttonText: String
