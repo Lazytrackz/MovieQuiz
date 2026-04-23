@@ -9,7 +9,7 @@ import Foundation
 
 //MARK: - QuestionFactory
 
-class QuestionFactory : QuestionFactoryProtocol {
+final class QuestionFactory : QuestionFactoryProtocol {
     
     // MARK: - Properties
     
@@ -50,8 +50,8 @@ class QuestionFactory : QuestionFactoryProtocol {
     // MARK: - Methods
 
     func setDelegate(_ delegate: QuestionFactoryDelegate) {
-           self.delegate = delegate
-       }
+        self.delegate = delegate
+    }
     
     func requestNextQuestion() {
         guard let index = (0..<questions.count).randomElement() else {

@@ -28,14 +28,4 @@ final class AlertPresenter {
             alert.addAction(action)
             controller.present(alert, animated: true, completion: nil)
     }
-    
- 
-        
-        
-    
-  
-   
-    
-  
-    
 }
