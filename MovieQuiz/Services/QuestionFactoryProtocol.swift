@@ -14,4 +14,5 @@ protocol QuestionFactoryProtocol {
     // MARK: - Methods
 
     func requestNextQuestion()
+    func loadData()
 }

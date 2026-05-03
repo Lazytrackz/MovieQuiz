@@ -14,5 +14,7 @@ protocol QuestionFactoryDelegate: AnyObject {
     // MARK: - Methods
     
     func didReceiveNextQuestion(question: QuizQuestion?)
+    func didLoadDataFromServer()
+    func didFailToLoadData(with error: Error)
 
 }

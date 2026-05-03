@@ -20,5 +20,6 @@ protocol StatisticServiceProtocol {
     // MARK: - Methods
     
     func storeGameResult(for previousGameResult: GameResult)
+    func setQuestionsCount(amount: Int)
     
 }

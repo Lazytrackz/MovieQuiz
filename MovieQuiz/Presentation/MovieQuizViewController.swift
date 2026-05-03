@@ -12,7 +12,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
-    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     // MARK: - Properties
     
     private var currentQuestionIndex = 0
@@ -30,34 +30,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     }()
     
     
-    // MARK: - Constants
-    
-    private enum AlertTitle {
-        static let titleString = "Этот раунд окончен!"
-        static let buttonString = "Сыграть ещё раз"
-        static let messageResultString = "Ваш результат: "
-        static let gameCountString = "Количество сыгранных квизов: "
-        static let bestGameString = "Рекорд: "
-        static let totalAccuracyString = "Средняя точность: "
-    }
-    
-   
-    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let staticService = StatisticService()
-        staticService.setQuestionsCount(amount: questionsAmount)
-        self.staticService = staticService
-        
-        let questionFactory = QuestionFactory()
-        questionFactory.setDelegate(self)
-        self.questionFactory = questionFactory
-        
-      
-        self.questionFactory?.requestNextQuestion()
+        staticService = StatisticService()
+        staticService?.setQuestionsCount(amount: questionsAmount)
+        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader())
+        showLoadingIndicator()
+        self.questionFactory?.loadData()
     }
     
     
@@ -70,6 +51,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         currentQuestion = question
         let viewModel = convert(model: question)
         show(quiz: viewModel)
+    }
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(message: error.localizedDescription)
     }
             
     // MARK: - Actions
@@ -90,13 +81,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     
     // MARK: - Private Methods
     
-    
-  
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
+        
          QuizStepViewModel(
-             image: UIImage(named: model.imageName) ?? UIImage(),
-             question: model.text,
-             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+            image: UIImage(data: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
     private func show(quiz step: QuizStepViewModel) {
@@ -124,13 +114,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
             guard let self = self else { return }
             beginNewGame()})
          
-         alertPresenter.showEndGameAlert(alertModel: alertModel, controller: self)
+         alertPresenter.show(alertModel: alertModel, controller: self)
     }
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
             let message = setGameResult()
-            let quizResult = QuizResultsViewModel (title: AlertTitle.titleString, text: message, buttonText: AlertTitle.buttonString)
+            let quizResult = QuizResultsViewModel (title: EndGameAlertTitle.titleString, text: message, buttonText: EndGameAlertTitle.buttonString)
             showResult(quiz: quizResult)}
         else {
             currentQuestionIndex += 1
@@ -139,7 +129,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     }
     
     private func showAnswerResult(isCorrect: Bool) {
-        
         enableButtons(false)
         
         if isCorrect {
@@ -157,34 +146,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     private func beginNewGame() {
         self.currentQuestionIndex = 0
         self.correctAnswers = 0
-        questionFactory?.requestNextQuestion()
+        self.questionFactory?.loadData()
     }
     
     private func setGameResult() -> String {
         let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: questionsAmount, endGameDate: Date())
         
         staticService?.storeGameResult(for: gameResult)
-        guard let staticService = staticService else {return "0"}
        
-        //guard let gamesCount = staticService?.gamesCount else {return "0"}
-        //guard let bestGame = staticService?.bestGameResult else {return "0"}
-        //guard let totalAccuracy = staticService?.totalAccuracy else {return "0"}
-        
-        
-        let gamesCount = staticService.gamesCount
-        let bestGame = staticService.bestGameResult
-        let totalAccuracy = staticService.totalAccuracy
-        
-        //let bestGameString = staticService.bestGameResult.correctAnswers
-        //let totalQuestionsString = staticService.bestGameResult.totalGameQuestions
-        //let time = dateFormatter.string(from: staticService.bestGameResult.endGameDate)
+        guard
+            let gamesCount = staticService?.gamesCount,
+            let bestGame = staticService?.bestGameResult,
+            let totalAccuracy = staticService?.totalAccuracy
+        else {
+            return "0"}
         
         let bestGameString = bestGame.correctAnswers
         let totalQuestionsString = bestGame.totalGameQuestions
         let time = dateFormatter.string(from: bestGame.endGameDate)
      
         
-        let message = " \(AlertTitle.messageResultString)\(correctAnswers)/\(questionsAmount)\n \(AlertTitle.gameCountString)\(gamesCount)\n \(AlertTitle.bestGameString) \(bestGameString)/\(totalQuestionsString) \(time)\n \(AlertTitle.totalAccuracyString)\(String(format: "%.2f", totalAccuracy))%"
+        let message = " \(EndGameAlertTitle.messageResultString)\(correctAnswers)/\(questionsAmount)\n \(EndGameAlertTitle.gameCountString)\(gamesCount)\n \(EndGameAlertTitle.bestGameString) \(bestGameString)/\(totalQuestionsString) \(time)\n \(EndGameAlertTitle.totalAccuracyString)\(String(format: "%.2f", totalAccuracy))%"
         
         return message
     }
@@ -199,5 +181,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
             noButton.isEnabled = false
         }
     }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let alertModel = AlertModel(title: ErrorAlertTitle.titleString,
+                                    message: message,
+                                    buttonText: ErrorAlertTitle.buttonString){ [weak self] in guard let self = self else { return }
+            currentQuestionIndex = 0
+            correctAnswers = 0
+            questionFactory?.loadData()
+        }
+        alertPresenter.show(alertModel: alertModel, controller: self)
+    }
+    
 }
 

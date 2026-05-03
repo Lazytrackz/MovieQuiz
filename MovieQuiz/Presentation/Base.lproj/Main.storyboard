@@ -44,10 +44,8 @@
                                             <constraint firstAttribute="width" secondItem="0Q1-IA-Kj2" secondAttribute="height" multiplier="2:3" id="ZAL-Tx-qqd"/>
                                         </constraints>
                                     </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FKw-cK-dy0" userLabel="Question Label">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FKw-cK-dy0" userLabel="Question Label">
                                         <rect key="frame" x="0.0" y="624.5" width="374" height="17.5"/>
-                                        <string key="text">Рейтинг этого фильма
-меньше чем 5?</string>
                                         <fontDescription key="fontDescription" name="YSDisplay-Bold" family="YS Display" pointSize="23"/>
                                         <color key="textColor" name="YP White (iOS)"/>
                                         <nil key="highlightedColor"/>
@@ -102,6 +100,9 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="EKp-pe-Um8">
+                                <rect key="frame" x="197" y="438" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black (iOS)"/>
@@ -109,10 +110,13 @@
                             <constraint firstItem="rN1-iO-GUo" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="MH3-Cd-3us"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="rN1-iO-GUo" secondAttribute="bottom" id="TEo-kS-Jcg"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="rN1-iO-GUo" secondAttribute="trailing" constant="20" id="V81-4C-dhJ"/>
+                            <constraint firstItem="EKp-pe-Um8" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="VUX-vC-tpT"/>
+                            <constraint firstItem="EKp-pe-Um8" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="pTx-5z-aeW"/>
                             <constraint firstItem="rN1-iO-GUo" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="zaV-ld-SaT"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="EKp-pe-Um8" id="g9o-KV-Uyb"/>
                         <outlet property="counterLabel" destination="a06-rf-E3d" id="st0-Ny-zYk"/>
                         <outlet property="imageView" destination="0Q1-IA-Kj2" id="qyj-7F-2mf"/>
                         <outlet property="noButton" destination="Tmz-5y-9gO" id="DS5-WR-o8W"/>
@@ -122,7 +126,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-55.223880597014919" y="54.919908466819216"/>
+            <point key="canvasLocation" x="-56.521739130434788" y="54.910714285714285"/>
         </scene>
     </scenes>
     <resources>
