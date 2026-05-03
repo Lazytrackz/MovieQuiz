@@ -82,7 +82,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     // MARK: - Private Methods
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        
          QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
@@ -146,6 +145,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     private func beginNewGame() {
         self.currentQuestionIndex = 0
         self.correctAnswers = 0
+        showLoadingIndicator()
         self.questionFactory?.loadData()
     }
     
@@ -197,9 +197,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         let alertModel = AlertModel(title: ErrorAlertTitle.titleString,
                                     message: message,
                                     buttonText: ErrorAlertTitle.buttonString){ [weak self] in guard let self = self else { return }
-            currentQuestionIndex = 0
-            correctAnswers = 0
-            questionFactory?.loadData()
+           beginNewGame()
         }
         alertPresenter.show(alertModel: alertModel, controller: self)
     }
