@@ -15,9 +15,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     // MARK: - Properties
     
-    private var currentQuestionIndex = 0
+    
+    private var presenter = MovieQuizPresenter()
+    //private var currentQuestionIndex = 0 //del latter
     private var correctAnswers = 0
-    private var questionsAmount = 10
+    //private var questionsAmount = 10 //del latter
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenter = AlertPresenter()
@@ -30,14 +32,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     }()
     
     
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    
         staticService = StatisticService()
-        staticService?.setQuestionsCount(amount: questionsAmount)
-        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader())
-        showLoadingIndicator()
+        staticService?.setQuestionsCount(amount: presenter.questionsAmount)
+        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader(), movieQuizViewController: self, alertPresenter: AlertPresenter())
+    
+        activityIndicator.startAnimating()
+        activityIndicator.hidesWhenStopped = true
+      
         self.questionFactory?.loadData()
     }
     
@@ -49,12 +56,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
             return
         }
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         show(quiz: viewModel)
     }
     
     func didLoadDataFromServer() {
-        hideLoadingIndicator()
+        //hideLoadingIndicator()
+        activityIndicator.stopAnimating()
         questionFactory?.requestNextQuestion()
     
     }
@@ -81,18 +89,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     
     // MARK: - Private Methods
     
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+   /* private func convert(model: QuizQuestion) -> QuizStepViewModel {
          QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
+            image: UIImage(data: model.imageData) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
+    }*/
     
     private func show(quiz step: QuizStepViewModel) {
         imageView.layer.cornerRadius = 20
         imageView.layer.borderWidth = 0
         counterLabel.text = step.questionNumber
-        imageView.image = step.image
+        imageView.image = UIImage(data: step.image) ?? UIImage()
         textLabel.text = step.question
         enableButtons(true)
     }
@@ -113,16 +121,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
             guard let self = self else { return }
             beginNewGame()})
          
-         alertPresenter.show(alertModel: alertModel, controller: self)
+         alertPresenter.show(alertModel: alertModel, controller: self, accessibilityId: "GameResults")
     }
     
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             let message = setGameResult()
             let quizResult = QuizResultsViewModel (title: EndGameAlertTitle.titleString, text: message, buttonText: EndGameAlertTitle.buttonString)
             showResult(quiz: quizResult)}
+        
+        
         else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             self.questionFactory?.requestNextQuestion()
         }
     }
@@ -142,15 +152,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         }
     }
     
-    private func beginNewGame() {
-        self.currentQuestionIndex = 0
-        self.correctAnswers = 0
-        showLoadingIndicator()
-        self.questionFactory?.loadData()
-    }
-    
     private func setGameResult() -> String {
-        let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: questionsAmount, endGameDate: Date())
+        let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: presenter.questionsAmount, endGameDate: Date())
         
         staticService?.storeGameResult(for: gameResult)
        
@@ -166,40 +169,46 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         let time = dateFormatter.string(from: bestGame.endGameDate)
      
         
-        let message = " \(EndGameAlertTitle.messageResultString)\(correctAnswers)/\(questionsAmount)\n \(EndGameAlertTitle.gameCountString)\(gamesCount)\n \(EndGameAlertTitle.bestGameString) \(bestGameString)/\(totalQuestionsString) \(time)\n \(EndGameAlertTitle.totalAccuracyString)\(String(format: "%.2f", totalAccuracy))%"
+        let message = """
+            \(EndGameAlertTitle
+                .messageResultString)\(correctAnswers)/\(presenter.questionsAmount) 
+            \(EndGameAlertTitle
+                .gameCountString)\(gamesCount) 
+            \(EndGameAlertTitle.bestGameString)\(bestGameString)/\(totalQuestionsString) \(time) 
+            \(EndGameAlertTitle
+                .totalAccuracyString)\(String(format: "%.2f", totalAccuracy))%
+            """
         
         return message
     }
     
     private func enableButtons(_ isEnable: Bool) {
-        if isEnable {
-            yesButton.isEnabled = true
-            noButton.isEnabled = true
-        }
-        else {
-            yesButton.isEnabled = false
-            noButton.isEnabled = false
-        }
-    }
-    
-    private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
-    }
-    
-    private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
+        yesButton.isEnabled = isEnable
+        noButton.isEnabled = isEnable
+        
     }
     
     private func showNetworkError(message: String) {
-        hideLoadingIndicator()
+        activityIndicator.stopAnimating()
         
         let alertModel = AlertModel(title: ErrorAlertTitle.titleString,
                                     message: message,
                                     buttonText: ErrorAlertTitle.buttonString){ [weak self] in guard let self = self else { return }
            beginNewGame()
         }
-        alertPresenter.show(alertModel: alertModel, controller: self)
+        alertPresenter.show(alertModel: alertModel, controller: self, accessibilityId: "NetworkError")
+    }
+    
+    
+    // MARK: - Methods
+    
+    func beginNewGame() {
+        //self.currentQuestionIndex = 0
+        self.presenter.resetQuestionIndex()
+        self.correctAnswers = 0
+        activityIndicator.startAnimating()
+        //showLoadingIndicator()
+        self.questionFactory?.loadData()
     }
     
 }

@@ -110,21 +110,3 @@ extension StatisticService: StatisticServiceProtocol {
     
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

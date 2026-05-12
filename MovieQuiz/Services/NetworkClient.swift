@@ -9,8 +9,8 @@ import Foundation
 
 //MARK: - NetworkClientStruct
 
-struct NetworkClient {
-
+struct NetworkClient: NetworkRouting {
+    
     private enum NetworkError: Error {
         case codeError
     }
@@ -21,7 +21,7 @@ struct NetworkClient {
         let request = URLRequest(url: url)
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
+            if let error {
                 handler(.failure(error))
                 return
             }
