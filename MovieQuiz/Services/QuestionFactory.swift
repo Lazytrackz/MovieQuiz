@@ -17,10 +17,10 @@ final class QuestionFactory : QuestionFactoryProtocol {
     
     private let logger = Logger(label: "MovieQuiz.QuestionFactory")
     weak var delegate: QuestionFactoryDelegate?
-    private let moviesLoader: MoviesLoading
+    private let moviesLoader: MoviesLoading?
     private var movies: [MostPopularMovie] = []
-    private let movieQuizViewController: MovieQuizViewController
-    private let alertPresenter: AlertPresenter
+    private let movieQuizViewController: MovieQuizViewController?
+    private let alertPresenter: AlertPresenter?
  
 
     
@@ -66,29 +66,11 @@ final class QuestionFactory : QuestionFactoryProtocol {
         ]
     */
     
-    // MARK: - Private Methods
-    
-    private func showImageDataError(message: String) {
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            
-            let alertModel = AlertModel(title: ErrorAlertTitle.titleString,
-                                        message: message,
-                                        buttonText: ErrorAlertTitle.buttonString){ [weak self] in guard let self = self else { return }
-                movieQuizViewController.beginNewGame()
-            }
-            alertPresenter.show(alertModel: alertModel, controller: movieQuizViewController, accessibilityId: "ImageError")
-        }
-    }
-    
-    
-
     
     // MARK: - Methods
 
     func loadData() {
-        moviesLoader.loadMovies { [weak self] result in
+        moviesLoader?.loadMovies { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 switch result {
@@ -119,7 +101,7 @@ final class QuestionFactory : QuestionFactoryProtocol {
             } catch {
                 //print("Failed to load image")
                 logger.warning("Failed to load image")
-                showImageDataError(message: "Failed to load image")
+                movieQuizViewController?.showImageDataError(message: "Failed to load image")
             }
             
             let rating = Float(movie.rating) ?? 0
