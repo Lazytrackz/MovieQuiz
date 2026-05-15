@@ -3,8 +3,8 @@ import UIKit
 
 //MARK: - ViewController
 
-final class MovieQuizViewController: UIViewController {
-
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
+    
     // MARK: - IBOutlets
     
     @IBOutlet weak private var yesButton: UIButton!
@@ -17,10 +17,10 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Properties
     
     private var presenter: MovieQuizPresenter!
-    private var questionFactory: QuestionFactoryProtocol?
+    //private var questionFactory: QuestionFactoryProtocol?
     private var alertPresenter: AlertPresenter = AlertPresenter()
-    private var staticService: StatisticServiceProtocol?
- 
+    //private var staticService: StatisticServiceProtocol?
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -29,7 +29,7 @@ final class MovieQuizViewController: UIViewController {
         presenter = MovieQuizPresenter(viewController: self)
         activityIndicator.hidesWhenStopped = true
     }
-
+    
     // MARK: - Actions
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -65,13 +65,13 @@ final class MovieQuizViewController: UIViewController {
                                     completion:{ [weak self] in
             guard let self = self else { return }
             self.presenter.restartGame()
-          
+            
         })
-         
-         alertPresenter.show(alertModel: alertModel, controller: self, accessibilityId: "GameResults")
+        
+        alertPresenter.show(alertModel: alertModel, controller: self, accessibilityId: "GameResults")
     }
     
-  
+    
     func showNetworkError(message: String) {
         activityIndicator.stopAnimating()
         

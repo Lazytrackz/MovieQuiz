@@ -99,7 +99,6 @@ final class QuestionFactory : QuestionFactoryProtocol {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
                 
             } catch {
-                //print("Failed to load image")
                 logger.warning("Failed to load image")
                 movieQuizViewController?.showImageDataError(message: "Failed to load image")
             }

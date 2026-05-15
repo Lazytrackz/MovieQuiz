@@ -14,7 +14,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     private var currentQuestion: QuizQuestion?
-    weak private var viewController: MovieQuizViewController?
+    weak private var viewController: MovieQuizViewControllerProtocol?
     private var questionFactory: QuestionFactoryProtocol?
     private var staticService: StatisticServiceProtocol?
     private var correctAnswers: Int = 0
@@ -25,7 +25,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         return formatter
     }()
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         staticService = StatisticService()
@@ -125,7 +125,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         self.proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+    func convert(model: QuizQuestion) -> QuizStepViewModel { //cделать private после тестов
         QuizStepViewModel(
             image: model.imageData,
             question: model.text,
