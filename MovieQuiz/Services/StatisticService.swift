@@ -18,10 +18,7 @@ final class StatisticService {
     private let storage: UserDefaults = .standard
     private var questionCount = 0
     
-    
-    
     // MARK: - Private Methods
-    
     
     private func getQuestionsAmount() -> Int {
         storage.integer(forKey: Keys.totalQuestionsAmount.rawValue)

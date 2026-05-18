@@ -11,7 +11,6 @@ import XCTest
 
 final class MoviesLoaderTests: XCTestCase {
     
-    
     struct StubNetworkClient: NetworkRouting {
         
         enum TestError: Error {

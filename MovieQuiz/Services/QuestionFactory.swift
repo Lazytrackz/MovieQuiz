@@ -11,7 +11,7 @@ import Logging
 
 //MARK: - QuestionFactory
 
-final class QuestionFactory : QuestionFactoryProtocol {
+final class QuestionFactory: QuestionFactoryProtocol {
     
     // MARK: - Properties
     
@@ -21,8 +21,6 @@ final class QuestionFactory : QuestionFactoryProtocol {
     private var movies: [MostPopularMovie] = []
     private let movieQuizViewController: MovieQuizViewController?
     private let alertPresenter: AlertPresenter?
- 
-
     
     init(delegate: QuestionFactoryDelegate? = nil, moviesLoader: MoviesLoading, movieQuizViewController: MovieQuizViewController, alertPresenter: AlertPresenter) {
         self.delegate = delegate
@@ -31,44 +29,44 @@ final class QuestionFactory : QuestionFactoryProtocol {
         self.alertPresenter = alertPresenter
     }
     
-
+    
     /* private let questions: [QuizQuestion] = [
-        QuizQuestion (imageName: "The Godfather",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: true),
-        QuizQuestion (imageName: "The Dark Knight",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: true),
-        QuizQuestion (imageName: "Kill Bill",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: true),
-        QuizQuestion (imageName: "The Avengers",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: true),
-        QuizQuestion (imageName: "Deadpool",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: true),
-        QuizQuestion (imageName: "The Green Knight",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: true),
-        QuizQuestion (imageName: "Old",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: false),
-        QuizQuestion (imageName: "The Ice Age Adventures of Buck Wild",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: false),
-        QuizQuestion (imageName: "Tesla",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: false),
-        QuizQuestion (imageName: "Vivarium",
-                      text: "Рейтинг этого фильма больше чем 6?",
-                      correctAnswer: false),
-        ]
-    */
+     QuizQuestion (imageName: "The Godfather",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: true),
+     QuizQuestion (imageName: "The Dark Knight",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: true),
+     QuizQuestion (imageName: "Kill Bill",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: true),
+     QuizQuestion (imageName: "The Avengers",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: true),
+     QuizQuestion (imageName: "Deadpool",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: true),
+     QuizQuestion (imageName: "The Green Knight",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: true),
+     QuizQuestion (imageName: "Old",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: false),
+     QuizQuestion (imageName: "The Ice Age Adventures of Buck Wild",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: false),
+     QuizQuestion (imageName: "Tesla",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: false),
+     QuizQuestion (imageName: "Vivarium",
+     text: "Рейтинг этого фильма больше чем 6?",
+     correctAnswer: false),
+     ]
+     */
     
     
     // MARK: - Methods
-
+    
     func loadData() {
         moviesLoader?.loadMovies { [weak self] result in
             DispatchQueue.main.async {
@@ -94,7 +92,7 @@ final class QuestionFactory : QuestionFactoryProtocol {
             let index = (0..<self.movies.count).randomElement() ?? 0
             guard let movie = self.movies[safe: index] else { return }
             var imageData = Data()
-        
+            
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
                 
@@ -119,8 +117,4 @@ final class QuestionFactory : QuestionFactoryProtocol {
         }
         
     }
-    
-    
-    
-    
 }

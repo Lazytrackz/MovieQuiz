@@ -31,7 +31,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         staticService = StatisticService()
         staticService?.setQuestionsCount(amount: self.questionsAmount)
         
-        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader(),  movieQuizViewController: MovieQuizViewController(), alertPresenter: AlertPresenter())
+        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader(), movieQuizViewController: MovieQuizViewController(), alertPresenter: AlertPresenter())
         
         questionFactory?.loadData()
         viewController.setActivityIndicator(isActive: true)
@@ -41,10 +41,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - QuestionFactoryDelegate
     
     func didLoadDataFromServer() {
-        
         viewController?.setActivityIndicator(isActive: false)
         questionFactory?.requestNextQuestion()
-        
     }
     
     func didFailToLoadData(with error: any Error) {
@@ -77,7 +75,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     private func proceedWithAnswer(isCorrect: Bool) {
         viewController?.enableButtons(false)
-        
         viewController?.setImageBorder(borderColor: isCorrect)
         self.didAnswer(isCorrectAnswer: isCorrect)
         
@@ -102,7 +99,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         let bestGameString = bestGame.correctAnswers
         let totalQuestionsString = bestGame.totalGameQuestions
         let time = dateFormatter.string(from: bestGame.endGameDate)
-        
         
         let message = """
             \(EndGameAlertTitle

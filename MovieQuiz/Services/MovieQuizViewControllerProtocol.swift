@@ -16,8 +16,4 @@ protocol MovieQuizViewControllerProtocol: AnyObject {
     func showImageDataError(message: String)
     func enableButtons(_ isEnable: Bool)
     func setActivityIndicator(isActive: Bool)
-    
-    
-    
-    
 }

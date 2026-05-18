@@ -26,7 +26,7 @@ final class ArrayTests: XCTestCase {
         
         let array = [1,1,2,3,5]
         let value = array[safe: 5]
-        
+
         XCTAssertNil(value)
     }
     

@@ -17,9 +17,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     // MARK: - Properties
     
     private var presenter: MovieQuizPresenter!
-    //private var questionFactory: QuestionFactoryProtocol?
     private var alertPresenter: AlertPresenter = AlertPresenter()
-    //private var staticService: StatisticServiceProtocol?
     
     // MARK: - Lifecycle
     
@@ -65,12 +63,10 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
                                     completion:{ [weak self] in
             guard let self = self else { return }
             self.presenter.restartGame()
-            
         })
         
         alertPresenter.show(alertModel: alertModel, controller: self, accessibilityId: "GameResults")
     }
-    
     
     func showNetworkError(message: String) {
         activityIndicator.stopAnimating()
@@ -84,7 +80,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     }
     
     func showImageDataError(message: String) {
-        
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
@@ -100,7 +95,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     func enableButtons(_ isEnable: Bool) {
         yesButton.isEnabled = isEnable
         noButton.isEnabled = isEnable
-        
     }
     
     func setActivityIndicator(isActive: Bool) {
@@ -109,9 +103,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         }else {
             activityIndicator.stopAnimating()
         }
-        
     }
-    
-    
 }
 

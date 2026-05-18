@@ -11,30 +11,17 @@ import XCTest
 final class MovieQuizViewControllerMock: MovieQuizViewControllerProtocol {
     
     
-    func show(quiz step: QuizStepViewModel) {
-        
-    }
-    func setImageBorder(borderColor: Bool) {
-        
-    }
-    func showResult(quiz result: QuizResultsViewModel) {
-        
-    }
-    func showNetworkError(message: String) {
-        
-    }
-    func showImageDataError(message: String) {
-        
-    }
-    func enableButtons(_ isEnable: Bool) {
-        
-    }
+    func show(quiz step: QuizStepViewModel) {}
+    func setImageBorder(borderColor: Bool) {}
+    func showResult(quiz result: QuizResultsViewModel) {}
+    func showNetworkError(message: String) {}
+    func showImageDataError(message: String) {}
+    func enableButtons(_ isEnable: Bool) {}
     func setActivityIndicator(isActive: Bool) {
-        
     }
 }
-    
-    
+
+
 final class MovieQuizPresenterTests: XCTestCase {
     
     func testPresenterConvertModel() throws {
@@ -49,6 +36,5 @@ final class MovieQuizPresenterTests: XCTestCase {
         XCTAssertEqual(viewModel.question, "Question Text")
         XCTAssertEqual(viewModel.questionNumber, "1/10")
     }
-    
 }
 
