@@ -19,22 +19,10 @@ final class StatisticService {
     private var questionCount = 0
     
     
-    // MARK: - UserDefaultsKeys
-    
-    private enum Keys: String {
-        case gamesCount
-        case correctAnswers
-        case totalGameQuestions
-        case endGameDate
-        case totalAccuracy
-        case totalQuestionsAmount
-        case totalCorrectAnswersAmount
-    }
-    
     
     // MARK: - Private Methods
     
-
+    
     private func getQuestionsAmount() -> Int {
         storage.integer(forKey: Keys.totalQuestionsAmount.rawValue)
     }
@@ -64,14 +52,7 @@ final class StatisticService {
             totalAccuracy = 0
         }
     }
-    
-    // MARK: - Public Methods
-    
-    func setQuestionsCount(amount: Int) {
-        questionCount = amount
-    }
 }
-    
 
 extension StatisticService: StatisticServiceProtocol {
     
@@ -112,7 +93,7 @@ extension StatisticService: StatisticServiceProtocol {
     
     // MARK: - Methods
     
-    func storeGameResult(gameResult: GameResult) {
+    func storeGameResult(for gameResult: GameResult) {
         gamesCount += 1
         setQuestionsAmount()
         setCorrectAnswersAmount(correctAnswers: gameResult)
@@ -122,23 +103,28 @@ extension StatisticService: StatisticServiceProtocol {
             bestGameResult = gameResult
         }
     }
+    
+    func setQuestionsCount(amount: Int) {
+        questionCount = amount
+    }
+    
 }
-        
-    
-    
-    
-    
-  
-    
-    
- 
-    
 
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

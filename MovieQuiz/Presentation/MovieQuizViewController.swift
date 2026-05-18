@@ -7,10 +7,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 
     // MARK: - IBOutlets
     
+    @IBOutlet weak var yesButton: UIButton!
+    @IBOutlet weak var noButton: UIButton!
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
-    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     // MARK: - Properties
     
     private var currentQuestionIndex = 0
@@ -28,45 +30,37 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     }()
     
     
-    // MARK: - Constants
-    
-    private enum AlertTitle {
-        static let titleString = "Этот раунд окончен!"
-        static let buttonString = "Сыграть ещё раз"
-        static let messageResultString = "Ваш результат: "
-        static let gameCountString = "Количество сыгранных квизов: "
-        static let bestGameString = "Рекорд: "
-        static let totalAccuracyString = "Средняя точность: "
-    }
-    
-   
-    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let staticService = StatisticService()
-        staticService.setQuestionsCount(amount: questionsAmount)
-        self.staticService = staticService
-        
-        let questionFactory = QuestionFactory()
-        questionFactory.setDelegate(self)
-        self.questionFactory = questionFactory
-        
-        self.questionFactory?.requestNextQuestion()
+        staticService = StatisticService()
+        staticService?.setQuestionsCount(amount: questionsAmount)
+        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader())
+        showLoadingIndicator()
+        self.questionFactory?.loadData()
     }
     
     
     // MARK: - QuestionFactoryDelegate
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
+        guard let question else {
             return
         }
         currentQuestion = question
         let viewModel = convert(model: question)
         show(quiz: viewModel)
+    }
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(message: error.localizedDescription)
     }
             
     // MARK: - Actions
@@ -87,13 +81,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     
     // MARK: - Private Methods
     
-    
-  
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
          QuizStepViewModel(
-             image: UIImage(named: model.imageName) ?? UIImage(),
-             question: model.text,
-             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+            image: UIImage(data: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
     private func show(quiz step: QuizStepViewModel) {
@@ -102,6 +94,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
         counterLabel.text = step.questionNumber
         imageView.image = step.image
         textLabel.text = step.question
+        enableButtons(true)
     }
     
     private func setImageBorder(currentImageView: UIImageView,
@@ -113,17 +106,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     }
     
      private func showResult(quiz result: QuizResultsViewModel) {
-        let alertModel = AlertModel (title: result.title, message: result.text, buttonText: result.buttonText, completion: { [weak self] in
+        let alertModel = AlertModel(title: result.title,
+                                    message: result.text,
+                                    buttonText: result.buttonText,
+                                    completion:{ [weak self] in
             guard let self = self else { return }
             beginNewGame()})
          
-         alertPresenter.showEndGameAlert(alertModel: alertModel, controller: self)
+         alertPresenter.show(alertModel: alertModel, controller: self)
     }
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
             let message = setGameResult()
-            let quizResult = QuizResultsViewModel (title: AlertTitle.titleString, text: message, buttonText: AlertTitle.buttonString)
+            let quizResult = QuizResultsViewModel (title: EndGameAlertTitle.titleString, text: message, buttonText: EndGameAlertTitle.buttonString)
             showResult(quiz: quizResult)}
         else {
             currentQuestionIndex += 1
@@ -132,6 +128,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     }
     
     private func showAnswerResult(isCorrect: Bool) {
+        enableButtons(false)
+        
         if isCorrect {
             setImageBorder(currentImageView: imageView, borderColor: isCorrect)
             correctAnswers += 1
@@ -147,88 +145,62 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
     private func beginNewGame() {
         self.currentQuestionIndex = 0
         self.correctAnswers = 0
-        questionFactory?.requestNextQuestion()
+        showLoadingIndicator()
+        self.questionFactory?.loadData()
     }
     
     private func setGameResult() -> String {
         let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: questionsAmount, endGameDate: Date())
         
-        staticService?.storeGameResult(gameResult: gameResult)
-        guard let gamesCount = staticService?.gamesCount else {return "0"}
-        guard let bestGame = staticService?.bestGameResult else {return "0"}
-        guard let totalAccuracy = staticService?.totalAccuracy else {return "0"}
+        staticService?.storeGameResult(for: gameResult)
+       
+        guard
+            let gamesCount = staticService?.gamesCount,
+            let bestGame = staticService?.bestGameResult,
+            let totalAccuracy = staticService?.totalAccuracy
+        else {
+            return "0"}
         
         let bestGameString = bestGame.correctAnswers
         let totalQuestionsString = bestGame.totalGameQuestions
         let time = dateFormatter.string(from: bestGame.endGameDate)
+     
         
-        let message = " \(AlertTitle.messageResultString)\(correctAnswers)/\(questionsAmount)\n \(AlertTitle.gameCountString)\(gamesCount)\n \(AlertTitle.bestGameString) \(bestGameString)/\(totalQuestionsString) \(time)\n \(AlertTitle.totalAccuracyString)\(String(format: "%.2f", totalAccuracy))%"
+        let message = " \(EndGameAlertTitle.messageResultString)\(correctAnswers)/\(questionsAmount)\n \(EndGameAlertTitle.gameCountString)\(gamesCount)\n \(EndGameAlertTitle.bestGameString) \(bestGameString)/\(totalQuestionsString) \(time)\n \(EndGameAlertTitle.totalAccuracyString)\(String(format: "%.2f", totalAccuracy))%"
         
         return message
     }
+    
+    private func enableButtons(_ isEnable: Bool) {
+        if isEnable {
+            yesButton.isEnabled = true
+            noButton.isEnabled = true
+        }
+        else {
+            yesButton.isEnabled = false
+            noButton.isEnabled = false
+        }
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let alertModel = AlertModel(title: ErrorAlertTitle.titleString,
+                                    message: message,
+                                    buttonText: ErrorAlertTitle.buttonString){ [weak self] in guard let self = self else { return }
+           beginNewGame()
+        }
+        alertPresenter.show(alertModel: alertModel, controller: self)
+    }
+    
 }
 
-
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-*/
