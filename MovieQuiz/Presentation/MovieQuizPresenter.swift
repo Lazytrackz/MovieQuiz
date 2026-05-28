@@ -11,6 +11,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     // MARK: - Properties
     
+    private var isLoadData: Bool = false
     private let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     private var currentQuestion: QuizQuestion?
@@ -27,14 +28,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
-        
-        staticService = StatisticService()
-        staticService?.setQuestionsCount(amount: self.questionsAmount)
-        
-        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader(), movieQuizViewController: MovieQuizViewController(), alertPresenter: AlertPresenter())
-        
-        questionFactory?.loadData()
-        viewController.setActivityIndicator(isActive: true)
+        initServices()
+        startGame()
     }
     
     
@@ -42,10 +37,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func didLoadDataFromServer() {
         viewController?.setActivityIndicator(isActive: false)
+        isLoadData = true
         questionFactory?.requestNextQuestion()
     }
     
     func didFailToLoadData(with error: any Error) {
+        isLoadData = false
         viewController?.showNetworkError(message: error.localizedDescription)
     }
     
@@ -62,10 +59,23 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     // MARK: - Private Properties
     
+    private func initServices() {
+        staticService = StatisticService()
+        staticService?.setQuestionsCount(amount: self.questionsAmount)
+        questionFactory = QuestionFactory(delegate: self, moviesLoader: MoviesLoader(), movieQuizViewController: MovieQuizViewController(), alertPresenter: AlertPresenter())
+    }
+    
+    private func startGame() {
+        questionFactory?.loadData()
+        viewController?.setActivityIndicator(isActive: true)
+    }
+    
     private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             let message = setGameResult()
-            let quizResult = QuizResultsViewModel (title: EndGameAlertTitle.titleString, text: message, buttonText: EndGameAlertTitle.buttonString)
+            let quizResult = QuizResultsViewModel (
+                title: EndGameAlertTitle.titleString,
+                text: message, buttonText: EndGameAlertTitle.buttonString)
             viewController?.showResult(quiz: quizResult)}
         else {
             self.switchToNextQuestion()
@@ -86,7 +96,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     private func setGameResult() -> String {
-        let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: questionsAmount, endGameDate: Date())
+        let gameResult = GameResult(correctAnswers: correctAnswers, totalGameQuestions: questionsAmount,endGameDate: Date())
         staticService?.storeGameResult(for: gameResult)
         
         guard
@@ -94,7 +104,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             let bestGame = staticService?.bestGameResult,
             let totalAccuracy = staticService?.totalAccuracy
         else {
-            return "0"}
+            return "0"
+        }
         
         let bestGameString = bestGame.correctAnswers
         let totalQuestionsString = bestGame.totalGameQuestions
@@ -114,14 +125,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     private func didAnswer(isYes: Bool) {
-        guard let currentQuestion = currentQuestion else {
+        guard let currentQuestion else {
             return
         }
         let givenAnswer = isYes
         self.proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    func convert(model: QuizQuestion) -> QuizStepViewModel { //cделать private после тестов
+    func convert(model: QuizQuestion) -> QuizStepViewModel { //TODO: cделать private после тестов
         QuizStepViewModel(
             image: model.imageData,
             question: model.text,
@@ -153,6 +164,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     func restartGame() {
+        if !isLoadData {
+            startGame()
+        }
         currentQuestionIndex = 0
         correctAnswers = 0
         questionFactory?.requestNextQuestion()
